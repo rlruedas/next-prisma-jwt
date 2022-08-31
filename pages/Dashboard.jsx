@@ -1,15 +1,14 @@
 import React from "react";
 import Layout from "../components/Layout";
+import { signOut } from "next-auth/react";
 
 function Dashboard(props) {
+  const { data } = props;
+
   return (
     <Layout>
-      <div>
-        <h1>
-          Hello {session.user.name}
-          <button onClick={() => signOut()}>Sign Out</button>
-        </h1>
-      </div>
+      <h1>Hello {data.user.name}</h1>
+      <button onClick={() => signOut()}>Sign Out</button>
     </Layout>
   );
 }
