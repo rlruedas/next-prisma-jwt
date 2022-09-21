@@ -1,31 +1,32 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import prisma from "../../../lib/prisma";
 
 export default NextAuth({
-  adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
-      name: "Credentials",
+      type: "credentials",
       credentials: {
         username: { label: "Username", type: "text", placeholder: "John" },
         password: { label: "Password", type: "password" },
       },
-      authorize: async (credentials, req) => {
-        const res = await fetch(`${process.env.NEXTAUTH_URL}/api/user`, {
-          method: 'POST',
-          body: JSON.stringify(credentials),
-          headers: { "Content-Type": "application/json" }
-        })
-        const user = await res.json
+      authorize: async (credentials) => {
+        const { username, password } = credentials;
 
-        // If no error and we have user data, return it
-        if (res.ok && user){
+        const res = await fetch(`${process.env.NEXTAUTH_URL}/api/authenticate`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username,
+            password,
+          }),
+        });
+
+        const user = res.json();
+
+        if (res.ok && user) {
           return user;
         }
-        // Return null if user data could not be retrieved
-        return Promise.reject(new Error("Invalid Credentials"));
+        return Promise.reject(new Error("Invalid credentials"));
       },
     }),
   ],
@@ -47,5 +48,8 @@ export default NextAuth({
   jwt: {
     secret: process.env.NEXTAUTH_SECRET,
     encryption: true,
+  },
+  pages: {
+    signIn: "/",
   },
 });

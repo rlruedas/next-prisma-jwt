@@ -1,35 +1,28 @@
-import { useRouter } from "next/router";
+import Router from "next/router";
 import React, { useState } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import { hashPassword } from "../utils/encrypt";
 
 import Layout from "../components/Layout";
-import { ToastContainer, toast } from "react-toastify";
 
-import { hashPassword } from "../utils/encrypt";
-import { signIn } from "next-auth/react";
-
-function Signup() {
-  const [username, setUserName] = useState();
-  const [password, setPassword] = useState();
-
-  const router = useRouter();
+function Register() {
+  const [userInfo, setUserInfo] = useState({ username: "", password: "" });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const passencrpyt = hashPassword(password);
+    const encryptPass = hashPassword(userInfo.password);
+    const body = { username: userInfo.username, password: encryptPass };
 
-    const res = await signIn("Credentials", {
-      username,
-      password: passencrpyt,
-      redirect: false,
-    });
+    try {
+      await fetch("/api/user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
 
-    if (res?.error) {
-      toast(res.error);
-    }
-
-    if (res?.ok) {
-      toast("Logging In");
-      router.push("/");
+      await Router.push("/");
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -38,6 +31,7 @@ function Signup() {
       <form
         onSubmit={handleSubmit}
         className="flex flex-col space-y-6 backdrop-blur-sm bg-slate-700 p-9 rounded-md"
+        method="Post"
       >
         <div className="flex flex-col">
           <label htmlFor="username">Username</label>
@@ -45,19 +39,28 @@ function Signup() {
             id="username"
             type="text"
             placeholder="John"
-            onChange={(e) => setUserName(e.target.value)}
+            onChange={(e) =>
+              setUserInfo({ ...userInfo, username: e.target.value })
+            }
             className="rounded-sm indent-2 py-1 px-1"
+            required
+            minLength="4"
           />
           <label htmlFor="password">Password</label>
           <input
             id="password"
             type="password"
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) =>
+              setUserInfo({ ...userInfo, password: e.target.value })
+            }
             className="rounded-sm indent-2 py-1 px-1"
+            required={true}
+            minLength="6"
           />
         </div>
         <button
-          onClick={handleSubmit}
+          disabled={!userInfo.username && !userInfo.password}
+          onSubmit={handleSubmit}
           type="submit"
           className="bg-green-600 px-2 py-2 rounded-md"
         >
@@ -69,4 +72,4 @@ function Signup() {
   );
 }
 
-export default Signup;
+export default Register;

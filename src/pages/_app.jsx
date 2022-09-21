@@ -1,6 +1,7 @@
 import "../styles/globals.css";
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
 import { SessionProvider } from "next-auth/react";
+import dynamic from 'next/dynamic'
 
 function MyApp({ Component, pageProps: { session, ...pageProps } }) {
   return (
@@ -9,5 +10,6 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
     </SessionProvider>
   );
 }
-
-export default MyApp;
+export default dynamic(() => Promise.resolve(MyApp), {
+  ssr: false,
+});
