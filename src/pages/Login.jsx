@@ -1,21 +1,30 @@
 import React, { useState } from "react";
 import { signIn } from "next-auth/react";
-import { router } from "next/router";
-import Layout from "../components/Layout";
+import Layout from "../components/layout";
+import { useRouter } from "next/router";
+import { toast } from "react-toastify";
 
 function Login() {
   const [userInfo, setUserInfo] = useState({ username: "", password: "" });
   const [loading, setLoading] = useState(false);
 
+  const router = useRouter();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const res = await signIn("credentials", {
+    await signIn("credentials", {
       username: userInfo.username,
       password: userInfo.password,
-    });
-
-    console.log(res);
+      redirect: false,
+    })
+      .then(() => {
+        toast.success("Success Loggin In!");
+        router.push("/dashboard");
+      })
+      .catch((error) => {
+        toast.error("Invalid Credentials!");
+      });
   };
 
   return (
@@ -58,7 +67,7 @@ function Login() {
             Login
           </button>
           <button
-            onClick={() => router.push("/Register")}
+            onClick={() => router.push("/register")}
             className="py-2 w-[30%] rounded-md border border-blue-400"
           >
             Sign Up

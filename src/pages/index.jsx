@@ -1,12 +1,11 @@
 import { useSession } from "next-auth/react";
 import Dashboard from "./dashboard";
-import Login from "./Login"
-import Layout from "../components/Layout";
+import Login from "./login";
+import Layout from "../components/layout";
+import { ToastContainer } from "react-toastify";
 
 export default function Home() {
-  const { data: session, status } = useSession();
-
-  console.log(status);
+  const { status } = useSession();
 
   if (status === "loading") {
     return (
@@ -19,6 +18,14 @@ export default function Home() {
   return (
     <Layout>
       <Login />
+      <ToastContainer
+        position="bottom-center"
+        autoClose={500}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+      />
     </Layout>
   );
 }

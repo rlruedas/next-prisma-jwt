@@ -1,12 +1,14 @@
-import Router from "next/router";
+import { useRouter } from "next/router";
 import React, { useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import { hashPassword } from "../utils/encrypt";
 
-import Layout from "../components/Layout";
+import Layout from "../components/layout";
 
 function Register() {
   const [userInfo, setUserInfo] = useState({ username: "", password: "" });
+
+  const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,9 +22,9 @@ function Register() {
         body: JSON.stringify(body),
       });
 
-      await Router.push("/");
+      router.push("/");
     } catch (error) {
-      console.error(error);
+      toast.error(error);
     }
   };
 

@@ -9,17 +9,18 @@ export default NextAuth({
         username: { label: "Username", type: "text", placeholder: "John" },
         password: { label: "Password", type: "password" },
       },
-      authorize: async (credentials) => {
-        const { username, password } = credentials;
-
-        const res = await fetch(`${process.env.NEXTAUTH_URL}/api/authenticate`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            username,
-            password,
-          }),
-        });
+      async authorize(credentials) {
+        const res = await fetch(
+          `${process.env.NEXTAUTH_URL}/api/authenticate`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              username: credentials?.username,
+              password: credentials?.password,
+            }),
+          }
+        );
 
         const user = res.json();
 
@@ -34,12 +35,16 @@ export default NextAuth({
     jwt: async ({ token, user }) => {
       if (user) {
         token.id = user.id;
+        token.username = user.username;
+        token.role = user.role;
       }
       return token;
     },
-    session: ({ session, token }) => {
+    session: async ({ session, token }) => {
       if (token) {
-        session.id == token.id;
+        session.user.id = token.id;
+        session.user.username = token.username;
+        session.user.role = token.role;
       }
       return session;
     },
@@ -51,5 +56,6 @@ export default NextAuth({
   },
   pages: {
     signIn: "/",
+    signOut: "/"
   },
 });
